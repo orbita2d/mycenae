@@ -83,6 +83,15 @@ function uniform(x, a, b) {
 }
 
 /**
+ * Sample from A with random number x
+ * @param {number} x selection value
+ * @param {number[]} A set
+ */
+function sample(x, A) {
+  return A[Math.floor(clamp(x, 0, 1) * A.length)];
+}
+
+/**
  * Change document background to p5 colour.
  * @param {p5.Color} colour Colour to set background to
  */
@@ -222,19 +231,22 @@ function getGradientPair(bg, select) {
   const c_PuRd = [bg, color(210, 180, 215), color(225, 85, 165), color(184, 10, 78), color(103, 0, 31)];
   const c_BuPu = [bg, color(186, 207, 228), color(140, 138, 192), color(133, 44, 143), color(77, 0, 75)];
   const c_PuBu = [bg, color(202, 206, 228), color(99, 162, 203), color(4, 103, 162), color(2, 56, 88)];
+  const c_greys = [bg, color(60, 0, 100), color(20, 0, 40)];
 
 
-  if (select < 0.2) {
+  if (select < 0.125) {
+    return [c_greys, c_reds, 'aion'];
+  } else if (select < 0.25) {
     return [c_reds, c_blues, 'eros'];
-  } else if (select < 0.4) {
+  } else if (select < 0.375) {
     return [c_blues, c_reds, 'erebus'];
-  } else if (select < 0.6) {
+  } else if (select < 0.5) {
     return [c_reds, c_BuPu, 'hypnos'];
-  } else if (select < 0.75) {
+  } else if (select < 0.625) {
     return [c_PuRd, c_blues, 'nesoi'];
-  } else if (select < 0.85) {
+  } else if (select < 0.75) {
     return [c_BuPu, c_blues, 'aether'];
-  } else if (select < 0.95) {
+  } else if (select < 0.875) {
     return [c_PuRd, c_PuBu, 'nyx'];
   } else {
     return [c_RdPu, c_blues, 'chaos'];
@@ -242,12 +254,12 @@ function getGradientPair(bg, select) {
 }
 
 function draw() {
-  const a = uniform(fxrand(), 1.75, 2.5);
-  const b = uniform(fxrand(), 1.75, 2.5);
-  const c = uniform(fxrand(), 1.0, 2.0);
-  const d = uniform(fxrand(), -1.0, -2.0);
+  const a = uniform(fxrand(), 1.75, 2.5) * sample(fxrand(), [-1, 1]);
+  const b = uniform(fxrand(), 1.75, 2.5) * sample(fxrand(), [-1, 1]);
+  const c = uniform(fxrand(), 0.9, 1.6) * sample(fxrand(), [-1, 1]);
+  const d = uniform(fxrand(), -0.9, -1.6) * sample(fxrand(), [-1, 1]);
   console.log(a, b, c, d);
-  rescale = fxrand() < .5;
+  rescale = fxrand() < .75;
   populateCounts(a, b, c, d, rescale)
 
   // Define colors
@@ -259,15 +271,9 @@ function draw() {
   let pairname = pair[2];
 
   render_select = fxrand();
-  if (render_select < 0.9) {
-    renderDeltaLerp(g1, g2, block_size, 0.25);
+  if (render_select < 1) {
+    renderDeltaLerp(g1, g2, block_size, 0.5);
     render_type = 'bilinear';
-  } else if (render_select < 0.95) {
-    renderCorners(bg, g1, g2, block_size);
-    render_type = 'corners';
-  } else {
-    renderDebug(bg, g1, g2, block_size);
-    render_type = 'debug';
   }
 
   window.$fxhashFeatures = {

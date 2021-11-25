@@ -4,3 +4,4 @@ p5.min.js
 build.sh
 .vscode/
 build/
+examples/
