@@ -1,5 +1,5 @@
 const alpha = 0.3;
-const block_size = 100000000;
+const block_size = 50000000;
 let counts = [];
 let delta = [];
 let max_delta = 0;
@@ -231,7 +231,7 @@ function getGradientPair(bg, select) {
   const c_PuRd = [bg, color(210, 180, 215), color(225, 85, 165), color(184, 10, 78), color(103, 0, 31)];
   const c_BuPu = [bg, color(186, 207, 228), color(140, 138, 192), color(133, 44, 143), color(77, 0, 75)];
   const c_PuBu = [bg, color(202, 206, 228), color(99, 162, 203), color(4, 103, 162), color(2, 56, 88)];
-  const c_greys = [bg, color(60, 0, 100), color(20, 0, 40)];
+  const c_greys = [bg, color(110, 100, 120), color(20, 0, 40)];
 
 
   if (select < 0.125) {
