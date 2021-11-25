@@ -1,12 +1,13 @@
 const alpha = 0.3;
-const block_size = 100000000;
+const block_size = 300000000;
 let counts = [];
 let delta = [];
 let max_delta = 0;
 let min_delta = block_size;
 
 function setup() {
-  createCanvas(512, 512);
+  const size = 800;
+  createCanvas(size, size);
   // Initialise counts to zeros
   for (let x = 0; x < width; x++) {
     counts[x] = []; // create nested array
