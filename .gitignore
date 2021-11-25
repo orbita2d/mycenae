@@ -3,3 +3,4 @@ p5.min.js
 *.zip
 build.sh
 .vscode/
+build/
