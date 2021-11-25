@@ -1,12 +1,12 @@
 const alpha = 0.3;
-const block_size = 300000000;
+const block_size = 100000000;
 let counts = [];
 let delta = [];
 let max_delta = 0;
 let min_delta = block_size;
 
 function setup() {
-  const size = 800;
+  const size = 640;
   createCanvas(size, size);
   // Initialise counts to zeros
   for (let x = 0; x < width; x++) {
@@ -21,6 +21,11 @@ function setup() {
   noLoop();
 }
 
+/**
+ * Implementation of LinearSegmentedColormap from mpl
+ * @param {p5.Color[]} colours List of colours
+ * @param {number} interp [0, 1] normalised interpolation index
+ */
 function colourmap(colours, interp) {
   const n = colours.length;
   // Which pair of colours are we interpolating between
@@ -37,21 +42,61 @@ function colourmap(colours, interp) {
   }
 }
 
+/**
+ * Clamp x in [a, b]
+ * @param {number} x value to clamp
+ * @param {number} a min
+ * @param {number} b max
+ */
 function clamp(x, a, b) {
-  // Clamp x in [a, b]
   return Math.min(Math.max(x, a), b);
 }
 
+/**
+ * Take x in [a, b], normalise to [0, 1]
+ * @param {number} x value to normalise
+ * @param {number} a min
+ * @param {number} b max
+ */
 function normalise(x, a, b) {
-  // Take x in [a, b], normalise to [0, 1]
   return (x - a) / (b - a);
 }
 
+/**
+ * Take x in [a, b], normalise to [0, 1] with clamping.
+ * @param {number} x value to normalise
+ * @param {number} a min
+ * @param {number} b max
+ */
 function nclamp(x, a, b) {
-  // Take x in [a, b], normalise to [0, 1] with clamping.
   return clamp(normalise(x, a, b), 0, 1);
 }
 
+/**
+ * Map [0, 1] normalised random number to [a, b]
+ * @param {number} x value to normalise
+ * @param {number} a min
+ * @param {number} b max
+ */
+function uniform(x, a, b) {
+  return a + x * (b - a);
+}
+
+/**
+ * Change document background to p5 colour.
+ * @param {p5.Color} colour Colour to set background to
+ */
+function changeBackground(colour) {
+  document.body.style.background = colour.toString('#rrggbb');
+}
+
+/**
+ * Render density matrix in debug mode, with gradients as background
+ * @param {p5.Color} highlight Colour at high density.
+ * @param {p5.Color[]} g1 Gradient1
+ * @param {p5.Color[]} g2 Gradient2
+ * @param {number} n Total points count.
+ */
 function renderDebug(highlight, g1, g2, n) {
   loadPixels()
   for (let x = 0; x < width; x++) {
@@ -70,6 +115,13 @@ function renderDebug(highlight, g1, g2, n) {
   updatePixels()
 }
 
+/**
+ * Render density matrix in debug mode, with gradients as background, but with g2 reversed.
+ * @param {p5.Color} highlight Colour at high density.
+ * @param {p5.Color[]} g1 Gradient1
+ * @param {p5.Color[]} g2 Gradient2
+ * @param {number} n Total points count.
+ */
 function renderCorners(highlight, g1, g2, n) {
   loadPixels()
   for (let x = 0; x < width; x++) {
@@ -88,6 +140,13 @@ function renderCorners(highlight, g1, g2, n) {
   updatePixels()
 }
 
+/**
+ * Render density matrix in bilinear mode.
+ * @param {p5.Color[]} g1 Gradient1
+ * @param {p5.Color[]} g2 Gradient2
+ * @param {number} count Total points count.
+ * @param {number} exponent Exponent for delta contrast.
+ */
 function renderDeltaLerp(g1, g2, count, exponent) {
   loadPixels()
   for (let x = 0; x < width; x++) {
@@ -107,6 +166,14 @@ function renderDeltaLerp(g1, g2, count, exponent) {
   updatePixels()
 }
 
+/**
+ * Render density matrix in bilinear mode.
+ * @param {number} a
+ * @param {number} b
+ * @param {number} c 
+ * @param {number} d
+ * @param {boolean} rescale Should we rescale the values of delta with the total counts there?
+ */
 function populateCounts(a, b, c, d, rescale) {
   let x = 0.1; let y = 0.2;
   const x_width = 1 + Math.abs(c);
@@ -142,6 +209,11 @@ function populateCounts(a, b, c, d, rescale) {
   }
 }
 
+/**
+ * Render density matrix in bilinear mode.
+ * @param {p5.Color} bg
+ * @param {number} select [0, 1] normalised random number for selecting colour scheme.
+ */
 function getGradientPair(bg, select) {
   // Select is [0, 1] normalised random number
   const c_reds = [bg, color(252, 181, 154), color(247, 93, 66), color(187, 20, 25), color(103, 0, 12)];
@@ -169,22 +241,18 @@ function getGradientPair(bg, select) {
   }
 }
 
-function uniform(a, b, select) {
-  // Map [0, 1] normalised random number to [a, b]
-  return a + select * (b - a);
-}
-
 function draw() {
-  const a = uniform(1.75, 2.5, fxrand());
-  const b = uniform(1.75, 2.5, fxrand());
-  const c = uniform(1.0, 2.0, fxrand());
-  const d = uniform(-1.0, -2.0, fxrand());
+  const a = uniform(fxrand(), 1.75, 2.5);
+  const b = uniform(fxrand(), 1.75, 2.5);
+  const c = uniform(fxrand(), 1.0, 2.0);
+  const d = uniform(fxrand(), -1.0, -2.0);
   console.log(a, b, c, d);
   rescale = fxrand() < .5;
   populateCounts(a, b, c, d, rescale)
 
   // Define colors
   const bg = color(255, 250, 245);
+  changeBackground(bg);
   let pair = getGradientPair(bg, fxrand());
   let g1 = pair[0];
   let g2 = pair[1];
@@ -204,7 +272,7 @@ function draw() {
 
   window.$fxhashFeatures = {
     "Render": render_type,
-    "PairName": pairname,
+    "Colour": pairname,
     "RenormaliseDelta": rescale
   }
   console.log(window.$fxhashFeatures);
