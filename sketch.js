@@ -106,7 +106,7 @@ function renderDeltaLerp(g1, g2, count, exponent) {
   updatePixels()
 }
 
-function populateCounts(a, b, c, d) {
+function populateCounts(a, b, c, d, rescale) {
   let x = 0.1; let y = 0.2;
   const x_width = 1 + Math.abs(c);
   const y_width = 1 + Math.abs(d);
@@ -127,6 +127,9 @@ function populateCounts(a, b, c, d) {
       if (counts[x][y] == 0) {
         continue;
       }
+      if (rescale) {
+        delta[x][y] = delta[x][y] / counts[x][y];
+      }
       let d = delta[x][y];
       if (d > max_delta) {
         max_delta = d;
@@ -145,6 +148,8 @@ function getGradientPair(bg, select) {
   const c_RdPu = [bg, color(251, 191, 190), color(240, 90, 158), color(153, 1, 123), color(73, 0, 106)];
   const c_PuRd = [bg, color(210, 180, 215), color(225, 85, 165), color(184, 10, 78), color(103, 0, 31)];
   const c_BuPu = [bg, color(186, 207, 228), color(140, 138, 192), color(133, 44, 143), color(77, 0, 75)];
+  const c_PuBu = [bg, color(202, 206, 228), color(99, 162, 203), color(4, 103, 162), color(2, 56, 88)];
+
 
   if (select < 0.2) {
     return [c_reds, c_blues, 'eros'];
@@ -152,10 +157,12 @@ function getGradientPair(bg, select) {
     return [c_blues, c_reds, 'erebus'];
   } else if (select < 0.6) {
     return [c_reds, c_BuPu, 'hypnos'];
-  } else if (select < 0.8) {
+  } else if (select < 0.75) {
     return [c_PuRd, c_blues, 'nesoi'];
-  } else if (select < 0.9) {
+  } else if (select < 0.85) {
     return [c_BuPu, c_blues, 'aether'];
+  } else if (select < 0.95) {
+    return [c_PuRd, c_PuBu, 'nyx'];
   } else {
     return [c_RdPu, c_blues, 'chaos'];
   }
@@ -172,8 +179,8 @@ function draw() {
   const c = uniform(1.0, 2.0, fxrand());
   const d = uniform(-1.0, -2.0, fxrand());
   console.log(a, b, c, d);
-  populateCounts(a, b, c, d)
-
+  rescale = fxrand() < .5;
+  populateCounts(a, b, c, d, rescale)
 
   // Define colors
   const bg = color(255, 250, 245);
@@ -181,11 +188,10 @@ function draw() {
   let g1 = pair[0];
   let g2 = pair[1];
   let pairname = pair[2];
-  console.log(pairname);
 
   render_select = fxrand();
   if (render_select < 0.9) {
-    renderDeltaLerp(g1, g2, block_size, 0.22);
+    renderDeltaLerp(g1, g2, block_size, 0.25);
     render_type = 'bilinear';
   } else if (render_select < 0.95) {
     renderCorners(bg, g1, g2, block_size);
@@ -194,10 +200,11 @@ function draw() {
     renderDebug(bg, g1, g2, block_size);
     render_type = 'debug';
   }
-  console.log(render_type);
 
   window.$fxhashFeatures = {
     "Render": render_type,
-    "PairName": pairname
+    "PairName": pairname,
+    "RenormaliseDelta": rescale
   }
+  console.log(window.$fxhashFeatures);
 }
